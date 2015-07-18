@@ -6,12 +6,32 @@ from pdfminer.layout import LAParams
 from pdfminer.pdfpage import PDFPage
 from cStringIO import StringIO
 from datetime import datetime
+from os.path import basename
+from urlparse import urlsplit
 import string
 import subprocess
 import re
+import urllib2
 
+def url2name(url):
+    return basename(urlsplit(url)[2])
 
-def convert_pdf(path):
+def convert_pdf(url, path):
+    localName = url2name(url)
+    req = urllib2.Request(url)
+    r = urllib2.urlopen(req)
+    if r.info().has_key('Content-Disposition'):
+        # If the response has Content-Disposition, we take file name from it
+        localName = r.info()['Content-Disposition'].split('filename=')[1]
+        if localName[0] == '"' or localName[0] == "'":
+            localName = localName[1:-1]
+    elif r.url != url:
+        # if we were redirected, the real file name we take from the final URL
+        localName = url2name(r.url)
+    f = open(path, 'wb')
+    f.write(r.read())
+    f.close()
+
     rsrcmgr = PDFResourceManager()
     retstr = StringIO()
     codec = 'utf-8'
@@ -63,11 +83,6 @@ def find_names(in_string):
         else:
             script = script + line.translate(string.maketrans('', ''), string.punctuation) + ' '
     return listy
-
-
-# male keywords
-man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends",
-            "gentlemen"]
 
 
 def is_woman(name):
@@ -131,19 +146,23 @@ def bechdel_test(lines):
                 del women_lines[:]
     return "weak. ur movie is probably sexist"
 
+# male keywords
+man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends",
+            "gentlemen"]
 
 # ######################### TESTING WITH PDF #########################
 
 startTime = datetime.now()
-with open('trial.txt', 'w') as out_file:
-    lst = find_names(convert_pdf('birdman.pdf'))
+with open('test.txt', 'w') as out_file:
+    # Both arguments should be parameters passed in by google
+    lst = find_names(convert_pdf('http://www.dailyscript.com/scripts/Pretty_Woman_Disney.pdf', 'belle2.pdf'))
     print >> out_file, bechdel_test(lst)
 print datetime.now() - startTime
 
 
 # ######################### TESTING WITH TEXT FILE #########################
 '''
-lst = find_names('screenplay.txt')
-with open('trial.txt', 'w') as out_file:
+lst = find_names('screenplay_ex.txt')
+with open('test.txt', 'w') as out_file:
         print >> out_file, bechdel_test(lst)
 '''
