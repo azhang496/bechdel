@@ -148,7 +148,7 @@ def bechdel_test(lines):
                     glob_len = len(women_lines)
                     # for i in range(glob_index, glob_index + glob_len):
                     #    print lines[i]
-                    return "ur movie passes all 3 Bechdel tests! good job"
+                    return 0
                 del women_lines[:]
         if is_woman(line[0]) or 'LADY' in line[0] or 'DIDO' in line[0]:
             # print line[0]
@@ -167,9 +167,9 @@ def bechdel_test(lines):
                     glob_len = len(women_lines)
                     # for i in range(glob_index, glob_index + glob_len):
                     #    print lines[i]
-                    return "ur movie passes all 3 Bechdel tests! good job"
+                    return 0
                 del women_lines[:]
-    return "weak. ur movie is probably sexist"
+    return 1
 
 # male keywords
 man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends",
