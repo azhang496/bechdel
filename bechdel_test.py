@@ -63,7 +63,7 @@ def find_names(in_string):
     scene_number = 0
     # for line in content:
     for line in in_string.splitlines():
-        if line[:1] == '(' or line[:1] == '*' or line[:1] == '\n':  # ADD MORE HERE FOR FEWER STAGE DIRECTIONS!!!!!!!!!
+        if line[:1] == '(' or line[:1] == '*' or line[:1] == '\n' or (line[:3].isupper() and not line.isupper()):
             continue
         if line.isdigit() and int(line) != scene_number:
             scene_number = int(line)
@@ -81,7 +81,7 @@ def find_names(in_string):
             script = ''
             sub_listy.append(line)
         else:
-            script = script + line.translate(string.maketrans('', ''), string.punctuation) + ' '
+            script = script + line.rstrip() + ''#line.translate(string.maketrans('', ''), string.punctuation) + ' '
     return listy
 
 
@@ -113,9 +113,28 @@ def man_proof(lines):
                 # print "male name detected"
                 return False
     return True
+def find(l, elem):
+    for row, i in enumerate(l):
+        try:
+            column = i.index(elem)
+        except ValueError:
+            continue
+        return row, column
+    return -1
 
+glob_index = 0
+glob_len = 0
+
+# Returns Bechdel dialogue as a string!
+def global_dialog(lst):
+    final_dialogue = ''
+    for i in range(glob_index, glob_index + glob_len):
+        final_dialogue = final_dialogue + '\n'.join(lst[i]) + '\n'
+    return final_dialogue
 
 def bechdel_test(lines):
+    global glob_index
+    global glob_len
     women_count = 0
     women_lines = []
     for i in range(0, len(lines)):
@@ -125,7 +144,10 @@ def bechdel_test(lines):
             women_count = 0
             if women_lines:
                 if man_proof(women_lines):
-                    print women_lines
+                    glob_index, sub_in = find(lines,women_lines[0])
+                    glob_len = len(women_lines)
+                    # for i in range(glob_index, glob_index + glob_len):
+                    #    print lines[i]
                     return "ur movie passes all 3 Bechdel tests! good job"
                 del women_lines[:]
         if is_woman(line[0]) or 'LADY' in line[0] or 'DIDO' in line[0]:
@@ -141,7 +163,10 @@ def bechdel_test(lines):
             women_count = 0
             if women_lines:
                 if man_proof(women_lines):
-                    print women_lines
+                    glob_index, sub_in = find(lines,women_lines[0])
+                    glob_len = len(women_lines)
+                    # for i in range(glob_index, glob_index + glob_len):
+                    #    print lines[i]
                     return "ur movie passes all 3 Bechdel tests! good job"
                 del women_lines[:]
     return "weak. ur movie is probably sexist"
@@ -155,8 +180,9 @@ man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "
 startTime = datetime.now()
 with open('test.txt', 'w') as out_file:
     # Both arguments should be parameters passed in by google
-    lst = find_names(convert_pdf('http://www.dailyscript.com/scripts/Pretty_Woman_Disney.pdf', 'belle2.pdf'))
+    lst = find_names(convert_pdf('http://d97a3ad6c1b09e180027-5c35be6f174b10f62347680d094e609a.r46.cf2.rackcdn.com/film_scripts/FSP3827_BELLE_SCRIPT_BOOK_C6a.pdf', 'belle2.pdf'))
     print >> out_file, bechdel_test(lst)
+    print global_dialog(lst)
 print datetime.now() - startTime
 
 
