@@ -126,7 +126,7 @@ def bechdel_test(lines):
             if women_lines:
                 if man_proof(women_lines):
                     print women_lines
-                    return "ur movie passes all 3 Bechdel tests! good job"
+                    return 0
                 del women_lines[:]
         if is_woman(line[0]) or 'LADY' in line[0] or 'DIDO' in line[0]:
             # print line[0]
@@ -142,9 +142,9 @@ def bechdel_test(lines):
             if women_lines:
                 if man_proof(women_lines):
                     print women_lines
-                    return "ur movie passes all 3 Bechdel tests! good job"
+                    return 0
                 del women_lines[:]
-    return "weak. ur movie is probably sexist"
+    return 1
 
 # male keywords
 man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends",
@@ -152,12 +152,12 @@ man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "
 
 # ######################### TESTING WITH PDF #########################
 
-startTime = datetime.now()
-with open('test.txt', 'w') as out_file:
-    # Both arguments should be parameters passed in by google
-    lst = find_names(convert_pdf('http://www.dailyscript.com/scripts/Pretty_Woman_Disney.pdf', 'belle2.pdf'))
-    print >> out_file, bechdel_test(lst)
-print datetime.now() - startTime
+# startTime = datetime.now()
+# with open('test.txt', 'w') as out_file:
+#     # Both arguments should be parameters passed in by google
+#     lst = find_names(convert_pdf('http://www.dailyscript.com/scripts/Pretty_Woman_Disney.pdf', 'belle2.pdf'))
+#     print >> out_file, bechdel_test(lst)
+# print datetime.now() - startTime
 
 
 # ######################### TESTING WITH TEXT FILE #########################

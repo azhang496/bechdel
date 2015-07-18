@@ -1,0 +1,69 @@
+<!doctype html>
+<title>Bechdel Test</title>
+<style>
+    body {
+        background: #FFFAF2;
+        color: #292929;
+    }
+    a {
+        color: #292929;
+        text-decoration: none
+    }
+    a:visited {
+        color: #292929;
+    }
+    img {
+        margin-top: 20px;
+    }
+    #result-block {
+        font-family: 'Yeseva One', serif;
+        font-size: 25px;
+        text-align: justify;
+        width: 455px;
+        margin-top: 60px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    #result {
+        color: #FF4E08;        
+    }
+    #back-link {
+        display: inline-block;
+        width: 580px;
+        margin-top: 30px;
+        margin-left: 410px;
+        margin-right: auto;
+    }
+    #back {
+        font-family: 'Yeseva One', serif;
+        font-size: 15px;
+        font-style: italic;
+    }
+    #back:hover {
+        color: #FF4E08;
+    }
+</style>
+
+<body>
+    <div id="result-block">
+        {% if result == -1 %}
+            <p id="result">Sorry, seems like the screenplay for this movie could not be found!</p>
+        {% else %}
+            The verdict is in...
+            <br>
+                {% if result == 1 %}
+                    <img src="/static/img/not-ok.jpg">
+                    <p id="result">Sorry, {{ movie }} failed the Bechdel test. Still got some work to do.</p>
+                {% elif result == 0 %}
+                    <img src="/static/img/a-ok.jpg">
+                    <p id="result">Woohoo, {{ movie }} passed the Bechdel test!</p>
+                {% endif %}
+        {% endif %}
+    </div>
+    <div id="back-link">
+        <a href="/" id="back">Back</a>
+    </div>
+</body>
+
+
+
