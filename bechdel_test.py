@@ -11,7 +11,6 @@ import subprocess
 import re
 
 
-
 def convert_pdf(path):
     rsrcmgr = PDFResourceManager()
     retstr = StringIO()
@@ -35,21 +34,27 @@ def convert_pdf(path):
 
 
 def find_names(in_string):
-    content = [line.rstrip('\n') for line in open(in_string)] #<-- if files were func input CHANGE THIS BACK FOR STRINGS, NOT FILES!!!!!!!!!!!!!!!!!
-    chars = set('1234567890$,!@#%^&*()?-.:')
+    # content = [line.rstrip('\n') for line in open(in_string)] # <-- for files NOT strings
+    chars = set('$,!@#%^&*()?-.:')
     listy = []
     sub_listy = []
     script = ''
     count = 0
-    for line in content:
-    #for line in in_string.splitlines():
-        if line[:1] == '(':
+    scene_number = 0
+    # for line in content:
+    for line in in_string.splitlines():
+        if line[:1] == '(' or line[:1] == '*' or line[:1] == '\n':  # ADD MORE HERE FOR FEWER STAGE DIRECTIONS!!!!!!!!!
             continue
-        if line.isdigit() and len(line) == 1:
-            scene_numer = int.line
+        if line.isdigit() and int(line) != scene_number:
+            scene_number = int(line)
+            sub_listy.append(script)
+            listy.append(sub_listy)
+            sub_listy = []
+            script = ''
+            sub_listy.append(line)
         elif line.isupper() and not any((c in chars) for c in line):
-            count +=1
-            if count > 1:                               # MAKE SURE THIS WORKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! (Was originally 4)
+            count += 1
+            if count > 1:
                 sub_listy.append(script)
                 listy.append(sub_listy)
             sub_listy = []
@@ -61,19 +66,23 @@ def find_names(in_string):
 
 
 # male keywords
-man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends", "gentlemen"]
+man_cave = ["man", "men", "guy", "guys", "he", "him", "himself", "his", "boy", "boyfriend", "boys", "boyfriends",
+            "gentlemen"]
 
-def isWoman(name):
+
+def is_woman(name):
     result = subprocess.check_output(["./name-genders", "gender-get_gender", name]).split()
     if result[len(result) - 1] == "female'":
         return True
     return False
 
-def isMan(name):
+
+def is_man(name):
     result = subprocess.check_output(["./name-genders", "gender-get_gender", name]).split()
     if result[len(result) - 1] == "male'":
         return True
     return False
+
 
 def man_proof(lines):
     for line in lines:
@@ -84,22 +93,31 @@ def man_proof(lines):
                 # print word
                 # print "male keyword detected"
                 return False
-            if isMan(word):
+            if is_man(word):
                 # print word
                 # print "male name detected"
                 return False
     return True
+
 
 def bechdel_test(lines):
     women_count = 0
     women_lines = []
     for i in range(0, len(lines)):
         line = lines[i]
-        if isWoman(line[0]) or 'LADY' in line[0] or 'DIDO' in line[0]:
+        if line[0].isdigit():
+            # new scene, so reset conversation
+            women_count = 0
+            if women_lines:
+                if man_proof(women_lines):
+                    print women_lines
+                    return "ur movie passes all 3 Bechdel tests! good job"
+                del women_lines[:]
+        if is_woman(line[0]) or 'LADY' in line[0] or 'DIDO' in line[0]:
             # print line[0]
             women_count += 1
             if women_count == 3:
-                for j in range(i-2, i+1):
+                for j in range(i - 2, i + 1):
                     women_lines.append(lines[j][1])
                     # print women_lines
             if women_count > 3:
@@ -114,18 +132,17 @@ def bechdel_test(lines):
     return "weak. ur movie is probably sexist"
 
 
-
-######################### TESTING #########################
+# ######################### TESTING WITH PDF #########################
 
 startTime = datetime.now()
-with open('screenplay2.txt', 'w') as out_file:
-    list = find_names(convert_pdf('belle.pdf'))
-    print >> out_file, bechdel_test(list)
+with open('trial.txt', 'w') as out_file:
+    lst = find_names(convert_pdf('birdman.pdf'))
+    print >> out_file, bechdel_test(lst)
 print datetime.now() - startTime
 
 
+# ######################### TESTING WITH TEXT FILE #########################
 '''
-##### When testing with a sample file ######
 lst = find_names('screenplay.txt')
 with open('trial.txt', 'w') as out_file:
         print >> out_file, bechdel_test(lst)
