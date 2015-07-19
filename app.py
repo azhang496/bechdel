@@ -11,11 +11,19 @@ app.config["DEBUG"] = True # delete this line before deploying!
 def bechdel_test(movie):
     for url in search("%s screenplay pdf" % movie, stop=5):
         if url.endswith('.pdf'):
-            pdf = bechdel.convert_pdf(url, 'screenplay.pdf')
+            try:
+                pdf = bechdel.convert_pdf(url, 'screenplay.pdf')
+            except Exception as e:
+                return [-1, None]
             list = bechdel.find_names(pdf)
-            return bechdel.bechdel_test(list)
+            result = bechdel.bechdel_test(list)
+            if result == 0:
+                return [result, bechdel.global_dialog(list)]
+            else:
+                print "failed, None"
+                return [result, None]
     print "didn't find screenplay"
-    return -1
+    return [-1, None]
 
 @app.route('/')
 def homepage():
@@ -26,16 +34,16 @@ def homepage_post():
     movie = request.form['movie']
     bechdel_result = bechdel_test(movie)
     session['movie'] = movie
-    session['bechdel_result'] = bechdel_result
+    session['pass_test'] = bechdel_result[0]
+    session['lines'] = bechdel_result[1]
     return redirect(url_for('result'))
 
 @app.route('/result')
 def result():
-    bechdel_result = session['bechdel_result']
-    print "bechdel_result: %d" % bechdel_result
     movie = session['movie']
-    print movie
-    return render_template("result.html", result=bechdel_result, movie=movie)
+    pass_test = session['pass_test']
+    lines = session['lines']
+    return render_template("result.html", result=pass_test, movie=movie, lines=lines)
 
 @app.route('/what-the-hechdel')
 def about_bechdel():

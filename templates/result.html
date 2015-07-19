@@ -27,12 +27,17 @@
     #result {
         color: #FF4E08;        
     }
+    #good-lines {
+        font-family: 'Open Sans', sans-serif;
+        font-size: 16px;
+    }
     #back-link {
         display: inline-block;
         width: 580px;
         margin-top: 30px;
         margin-left: 410px;
         margin-right: auto;
+        margin-bottom: 20px;
     }
     #back {
         font-family: 'Yeseva One', serif;
@@ -57,6 +62,11 @@
                 {% elif result == 0 %}
                     <img src="/static/img/a-ok.jpg">
                     <p id="result">Woohoo, {{ movie }} passed the Bechdel test!</p>
+                    <div id="good-lines">
+                        {% for line in lines %}
+                            <b>{{ line[0] }}:</b> {{ line[1] }}<br>
+                        {% endfor %}
+                    </div>
                 {% endif %}
         {% endif %}
     </div>
